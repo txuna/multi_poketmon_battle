@@ -32,6 +32,7 @@ void GameObject::Init()
     {
         std::cout<<"Init Batttle"<<std::endl;
         user->mob.Init();
+        user->has_tech_request = false;
     }
     
     round = 1;

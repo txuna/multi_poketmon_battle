@@ -82,12 +82,12 @@ void MonsterChoiceResponse::WriteProtocol(ErrorCode r)
     offset += sizeof(result);
 }
 
-void BattleStateResponse::WriteProtocol(ErrorCode r, BattleState s)
+void BattleFinResponse::WriteProtocol(ErrorCode r)
 {
-    type = ServerMsg::BattleStateResult;
+    type = ServerMsg::BattleFinResult;
     len = sizeof(ErrorCode) + sizeof(GameState);
     result = r; 
-    state = s;
+    state = BattleState::Fin;
 
     memcpy(buffer, &type, sizeof(type));
     offset += sizeof(type);

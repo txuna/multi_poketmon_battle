@@ -248,10 +248,10 @@ void GameServer::SendGameState()
     delete gRes;
 }
 
-void GameServer::SendBattleState(BattleState s)
+void GameServer::SendBattleFin()
 {
-    BattleStateResponse *res = new BattleStateResponse();
-    res->WriteProtocol(ErrorCode::None, s); 
+    BattleFinResponse *res = new BattleFinResponse();
+    res->WriteProtocol(ErrorCode::None); 
     for(UserObject *user : game.users)
     {
         TcpSocket *socket = el.LoadSocket(user->fd);
@@ -326,7 +326,6 @@ void GameServer::ProcessGameState()
                 }
                 
                 game.bstate = BattleState::Start;
-                //SendBattleState(BattleState::Start); 추후 배틀이 끝났을 떄 이걸로 전송
                 SendBattleStart();
                 break;
             }
@@ -334,9 +333,27 @@ void GameServer::ProcessGameState()
             // 게임이 진행중이라면 게임 정보 전송 
             // 몬스터 정보는 딱 한번 보낼까 Choice단계에서 Start단계로 넘어갈 때?
             // 기술들은 2명다 request 날리고 종합 후 response 이때 몬스터 정보랑 선턴, 기술정보 보내기
+            // 경기가 끝났다면 SendBattleFin 보내기 
             else if(game.bstate == BattleState::Start)
             {
+                for(UserObject *user : game.users)
+                {
+                    if(user->has_tech_request == false)
+                    {
+                        std::cout<<"몬스터들의 기술이 적용되지 않았습니다."<<std::endl;
+                        return;
+                    }
+                }
 
+                std::cout<<"몬스터 기술 계산"<<std::endl;
+                CalculatorMonster();
+
+                for(UserObject *user : game.users)
+                {
+                    user->has_tech_request = false;
+                }
+
+                game.round += 1;
             }
 
             break;
@@ -345,6 +362,11 @@ void GameServer::ProcessGameState()
         default:
             break;
     }
+}
+
+void GameServer::CalculatorMonster()
+{
+
 }
 
 GameServer::GameServer()

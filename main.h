@@ -47,7 +47,7 @@ class GameServer
         void ProcessEvent(int retval);
         void SendGameState();
         // Choice, Start, Fin 기존과 다르게 변경되었을 때 알림
-        void SendBattleState(BattleState s);
+        void SendBattleFin();
         // 게임정보 전송
         void SendBattleStart();
         void SendBattleInfo();
@@ -58,6 +58,7 @@ class GameServer
         void ProcessingPorotocol(TcpSocket *socket, int ret);
         void DeleteGameUser(socket_t fd);
         bool AuthUser(socket_t fd);
+        void CalculatorMonster();
         GameServer();
         ~GameServer();
 };

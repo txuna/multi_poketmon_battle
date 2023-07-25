@@ -35,7 +35,7 @@ enum ServerMsg
     JoinResult = 1,
     GameStateResult,
     ChoiceMonsterResult,
-    BattleStateResult,
+    BattleFinResult,
     BattleStartResult,
     BattleInfoResult, 
 };

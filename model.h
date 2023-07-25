@@ -28,6 +28,8 @@ class UserObject
         uint8_t name[NAME_LEN];
         socket_t fd;
         Monster mob;
+        // 서버는 지속적으로 user목록을 돌면서 해당 유저 모두가 해당 변수값으로 세팅되었다면 포켓몬 기술 계산 후 응답 전송
+        bool has_tech_request; // 기술을 서버에 보냈는지 해당 라운드가 끝날때 false로 다시 세팅
 };
 
 

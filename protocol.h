@@ -110,13 +110,13 @@ class MonsterChoiceResponse : public Protocol
         void WriteProtocol(ErrorCode r);
 };
 
-class BattleStateResponse : public Protocol
+class BattleFinResponse : public Protocol
 {
     public:
         ErrorCode result; 
         BattleState state; 
         uint8_t buffer[SOCKET_BUFFER] = {0};
-        void WriteProtocol(ErrorCode r, BattleState s);
+        void WriteProtocol(ErrorCode r);
 };
 
 class BattleStartResponse : public Protocol
@@ -148,5 +148,17 @@ class BattleInfoResponse : public Protocol
         
         void WriteProtocol(ErrorCode r);
 };
+
+class TechRequest : public Protocol
+{
+
+};
+
+class TechResponse : public Protocol
+{
+
+};
+
+
 
 #endif 

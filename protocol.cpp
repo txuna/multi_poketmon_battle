@@ -122,6 +122,31 @@ void BattleStartResponse::WriteProtocol(ErrorCode r, std::vector<UserObject*> us
     }
 }
 
+int SkillRequest::ReadProtocol(uint8_t *buffer)
+{
+    memcpy(&type, buffer, sizeof(type));
+    offset += sizeof(type);
+    memcpy(&len, buffer+offset, sizeof(len));
+    offset += sizeof(len);
+    memcpy(&code, buffer+offset, sizeof(code));
+    offset += sizeof(code);
+    return offset;
+}
+
+void SkillResponse::WriteProtocol(ErrorCode r)
+{
+    type = ServerMsg::SkillResult; 
+    len = sizeof(ErrorCode); 
+    result = r; 
+
+    memcpy(buffer, &type, sizeof(type));
+    offset += sizeof(type);
+    memcpy(buffer+offset, &len, sizeof(len));
+    offset += sizeof(len);
+    memcpy(buffer+offset, &result, sizeof(result));
+    offset += sizeof(result);
+}
+
 void BattleInfoResponse::WriteProtocol(ErrorCode r)
 {
 

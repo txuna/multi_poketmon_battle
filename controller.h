@@ -34,4 +34,11 @@ class ChoiceMonsterController : public Controller
         MonsterChoiceResponse *Choice(TcpSocket *socket, int *rb, GameObject *game);
 };
 
+class SkillController : public Controller
+{
+    public:
+        ErrorCode Verify(UserObject *user, int code);
+        SkillResponse *Choie(TcpSocket *socket, int *rb, GameObject *game);
+};
+
 #endif 

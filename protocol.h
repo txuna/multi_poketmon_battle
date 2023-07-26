@@ -40,13 +40,7 @@ type(1byte)
 len(4byte)
 result(4byte)
 
-6. BattleState Response 
-type(1byte)
-len(4byte)
-result(4byte)
-state(4byte)
-
-7 BattleStart Response
+6. BattleStart Response
 type(1byte)
 len(4byte)
 result(4byte)
@@ -56,6 +50,16 @@ code(4byte)
 
 name(32byte)
 code(4byte)
+
+7. skill request 
+type(1byte)
+len(4byte)
+skill_id 
+
+8. skill response 
+type(1byte)
+len(4byte)
+result(4byte)
 
 */
 
@@ -144,19 +148,25 @@ class BattleInfoResponse : public Protocol
         uuid_t b_uid; 
         Monster b_mob; 
 
-        // 현재 상황
+        // 현재 상황 전송
         
         void WriteProtocol(ErrorCode r);
 };
 
-class TechRequest : public Protocol
+class SkillRequest : public Protocol
 {
-
+    public:
+        int code; 
+        int ReadProtocol(uint8_t *buffer);
 };
 
-class TechResponse : public Protocol
+class SkillResponse : public Protocol
 {
-
+    public:
+        uint8_t buffer[SOCKET_BUFFER] = {0};
+        ErrorCode result;
+    
+        void WriteProtocol(ErrorCode r);
 };
 
 

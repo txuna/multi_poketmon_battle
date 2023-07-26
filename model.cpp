@@ -1,9 +1,16 @@
 #include "model.h"
 
 Monster mob_list[3] = {
-    {0, 10, 10, 10, 10},
-    {1, 10, 10, 10, 10},
-    {2, 10, 10, 10, 10},
+    {0, 10, 10, 10, 10, AttackType::Water, {0, 2, -1, -1}},
+    {1, 10, 10, 10, 10, AttackType::Grass, {0, 3, -1, -1}},
+    {2, 10, 10, 10, 10, AttackType::Fire, {0, 1, -1, -1}},
+};
+
+Tech skill[4] = {
+    {0, AttackType::Normal, 30, 100},
+    {1, AttackType::Fire, 50, 80},
+    {2, AttackType::Water, 40, 100},
+    {3, AttackType::Grass, 60, 70},
 };
 
 void Monster::Init()
@@ -13,6 +20,7 @@ void Monster::Init()
     attack = 0;
     defence = 0;
     speed = 0;
+    type = 0;
 }
 
 void Monster::Set(int code)
@@ -23,6 +31,7 @@ void Monster::Set(int code)
     this->attack = temp.attack; 
     this->defence = temp.defence; 
     this->speed = temp.speed;
+    this->type = temp.type;
 }
 
 
@@ -32,7 +41,7 @@ void GameObject::Init()
     {
         std::cout<<"Init Batttle"<<std::endl;
         user->mob.Init();
-        user->has_tech_request = false;
+        user->has_skill_request = false;
     }
     
     round = 1;

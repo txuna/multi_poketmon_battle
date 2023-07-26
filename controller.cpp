@@ -121,13 +121,61 @@ MonsterChoiceResponse *ChoiceMonsterController::Choice(TcpSocket *socket, int *r
             user->mob.Set(req->code);
             std::cout<<"Ok Choice Monster"<<std::endl;
         }
-        else
-        {
-            std::cout<<"Failed Choice Monster"<<std::endl;
-        }
     }
 
     MonsterChoiceResponse *res = new MonsterChoiceResponse();
     res->WriteProtocol(result);
+
+    delete req;
+    return res;
+}
+
+// 해당 몬스터에게 존재하는 skill인지 확인
+ErrorCode SkillController::Verify(UserObject *user, int code)
+{
+    if(user->has_skill_request == true)
+    {
+        return ErrorCode::AlreadyChoiceSkill;
+    }
+
+    Monster mob = mob_list[user->mob.code];
+    for(int i=0; i<4; i++)
+    {
+        if(code == mob.tech[i])
+        {
+            return ErrorCode::None;
+        }
+    }
+
+    return ErrorCode::InvalidSkill;
+}
+
+SkillResponse* SkillController::Choie(TcpSocket *socket, int *rb, GameObject *game)
+{
+    ErrorCode result = ErrorCode::None;
+    uint8_t *buffer = socket->LoadBuffer();
+    SkillRequest *req = new SkillRequest();
+    *rb = req->ReadProtocol(buffer);
+
+    std::cout<<"Request Skill "<<socket->GetSocket()<<" : "<<req->code<<std::endl;
+    UserObject *user = game->LoadUser(socket->GetSocket());
+
+    if(user == nullptr)
+    {
+        result = ErrorCode::NonExistUser;
+    }
+    else
+    {
+        result = Verify(user, req->code);
+        if(result == ErrorCode::None)
+        {
+            user->has_skill_request = true;
+        }
+    }
+
+    SkillResponse *res = new SkillResponse();
+    res->WriteProtocol(result); 
+
+    delete req;
     return res;
 }

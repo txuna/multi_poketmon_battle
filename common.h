@@ -17,6 +17,14 @@ typedef int uuid_t;
 
 #define MAX_USER 2
 
+enum AttackType
+{
+    Fire = 1,
+    Water, 
+    Grass, 
+    Normal
+};
+
 enum GameState
 {
     GameReady = 1,
@@ -38,12 +46,14 @@ enum ServerMsg
     BattleFinResult,
     BattleStartResult,
     BattleInfoResult, 
+    SkillResult,
 };
 
 enum ClientMsg
 {
     JoinServer = 1,
     ChoiceMonster,
+    Skill,
 };
 
 enum ErrorCode
@@ -55,6 +65,8 @@ enum ErrorCode
     NonExistUser,
     AlreadyChoiceMonster,
     NonExistMonster,
+    InvalidSkill,
+    AlreadyChoiceSkill,
 };
 
 #endif 

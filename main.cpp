@@ -188,6 +188,7 @@ void GameServer::ProcessingPorotocol(TcpSocket *socket, int ret)
                 LoginController *loginController = new LoginController();
                 LoginResponse *loginRes = loginController->Login(socket, &temp, &game);
                 socket->SendSocket(loginRes->buffer, loginRes->offset);
+
                 delete loginController;
                 delete loginRes;
                 break;
@@ -197,6 +198,17 @@ void GameServer::ProcessingPorotocol(TcpSocket *socket, int ret)
             {
                 ChoiceMonsterController *controller = new ChoiceMonsterController();
                 MonsterChoiceResponse *res = controller->Choice(socket, &temp, &game);
+                socket->SendSocket(res->buffer, res->offset);
+
+                delete controller; 
+                delete res;
+                break;
+            }
+
+            case ClientMsg::Skill:
+            {
+                SkillController *controller = new SkillController();
+                SkillResponse *res = controller->Choie(socket, &temp, &game);
                 socket->SendSocket(res->buffer, res->offset);
 
                 delete controller; 
@@ -338,7 +350,7 @@ void GameServer::ProcessGameState()
             {
                 for(UserObject *user : game.users)
                 {
-                    if(user->has_tech_request == false)
+                    if(user->has_skill_request == false)
                     {
                         std::cout<<"몬스터들의 기술이 적용되지 않았습니다."<<std::endl;
                         return;
@@ -350,7 +362,7 @@ void GameServer::ProcessGameState()
 
                 for(UserObject *user : game.users)
                 {
-                    user->has_tech_request = false;
+                    user->has_skill_request = false;
                 }
 
                 game.round += 1;

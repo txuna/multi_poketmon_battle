@@ -9,6 +9,15 @@
 
 #include "common.h"
 
+class Tech
+{
+    public:
+        int code;
+        int type;
+        int damage; 
+        int hit_rate;
+};
+
 class Monster 
 {
     public:
@@ -17,6 +26,8 @@ class Monster
         int attack; 
         int defence; 
         int speed; 
+        int type;
+        int tech[4];
 
         void Init();
         void Set(int code);
@@ -29,7 +40,7 @@ class UserObject
         socket_t fd;
         Monster mob;
         // 서버는 지속적으로 user목록을 돌면서 해당 유저 모두가 해당 변수값으로 세팅되었다면 포켓몬 기술 계산 후 응답 전송
-        bool has_tech_request; // 기술을 서버에 보냈는지 해당 라운드가 끝날때 false로 다시 세팅
+        bool has_skill_request; // 기술을 서버에 보냈는지 해당 라운드가 끝날때 false로 다시 세팅
 };
 
 

@@ -1,12 +1,12 @@
 #include "model.h"
 
 Monster mob_list[3] = {
-    {0, 10, 10, 10, 10, AttackType::Water, {0, 2, -1, -1}},
-    {1, 10, 10, 10, 10, AttackType::Grass, {0, 3, -1, -1}},
-    {2, 10, 10, 10, 10, AttackType::Fire, {0, 1, -1, -1}},
+    {0, 100, 20, 50, 20, AttackType::Water, {0, 2, -1, -1}},
+    {1, 100, 25, 50, 15, AttackType::Grass, {0, 3, -1, -1}},
+    {2, 100, 30, 50, 10, AttackType::Fire, {0, 1, -1, -1}},
 };
 
-Tech skill[4] = {
+Tech tech_list[4] = {
     {0, AttackType::Normal, 30, 100},
     {1, AttackType::Fire, 50, 80},
     {2, AttackType::Water, 40, 100},
@@ -42,8 +42,10 @@ void GameObject::Init()
         std::cout<<"Init Batttle"<<std::endl;
         user->mob.Init();
         user->has_skill_request = false;
+        user->tech_value = -1;
     }
     
+    win_uid = -1;
     round = 1;
     bstate = BattleState::Choice;
 }

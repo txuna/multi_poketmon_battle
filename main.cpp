@@ -3,6 +3,7 @@
 #include "main.h"
 
 extern Monster mob_list[3];
+extern Tech tech_list[4];
 
 int main(int argc, char **argv)
 {
@@ -242,40 +243,19 @@ void GameServer::DeleteGameUser(socket_t fd)
 
 void GameServer::SendGameState()
 {
-    GameStateResponse *gRes = new GameStateResponse();
-    gRes->WriteProtocol(ErrorCode::None, game.gstate);
+    GameStateResponse *res = new GameStateResponse();
+    res->WriteProtocol(ErrorCode::None, game.gstate);
     
-    for(UserObject *user : game.users)
-    {
-        TcpSocket *socket = el.LoadSocket(user->fd);
-        if(socket == nullptr) continue;
-
-        int ret = socket->SendSocket(gRes->buffer, gRes->offset);
-        if(ret == C_ERR)
-        {
-            std::cout<<"Failed Send Socket"<<std::endl;
-        }
-    }
-
-    delete gRes;
+    SendData(res->buffer, res->offset);
+    delete res;
 }
 
 void GameServer::SendBattleFin()
 {
     BattleFinResponse *res = new BattleFinResponse();
-    res->WriteProtocol(ErrorCode::None); 
-    for(UserObject *user : game.users)
-    {
-        TcpSocket *socket = el.LoadSocket(user->fd);
-        if(socket == nullptr) continue;
-
-        int ret = socket->SendSocket(res->buffer, res->offset);
-        if(ret == C_ERR)
-        {
-            std::cout<<"Failed Send Socket"<<std::endl;
-        }
-    }
-
+    res->WriteProtocol(ErrorCode::None, game.win_uid); 
+    
+    SendData(res->buffer, res->offset);
     delete res;
 }
 
@@ -284,19 +264,33 @@ void GameServer::SendBattleStart()
 {
     BattleStartResponse *res = new BattleStartResponse();
     res->WriteProtocol(ErrorCode::None, game.users); 
-    for(UserObject* user : game.users)
+
+    SendData(res->buffer, res->offset);
+    delete res;
+}
+
+void GameServer::SendBattleInfo(BattleInfo *bi)
+{
+    BattleInfoResponse *res = new BattleInfoResponse();
+    res->WriteProtocol(ErrorCode::None, bi, game.users);
+
+    SendData(res->buffer, res->offset);
+    delete res;
+}
+
+void GameServer::SendData(uint8_t *buffer, int len)
+{
+    for(UserObject *user : game.users)
     {
         TcpSocket *socket = el.LoadSocket(user->fd); 
         if(socket == nullptr) continue; 
 
-        int ret = socket->SendSocket(res->buffer, res->offset);
+        int ret = socket->SendSocket(buffer, len);
         if(ret == C_ERR)
         {
             std::cout<<"Failed Send Socket"<<std::endl;
         }
     }
-
-    delete res;
 }
 
 void GameServer::ProcessGameState()
@@ -350,7 +344,7 @@ void GameServer::ProcessGameState()
             {
                 for(UserObject *user : game.users)
                 {
-                    if(user->has_skill_request == false)
+                    if(user->has_skill_request == false || user->tech_value == -1)
                     {
                         std::cout<<"몬스터들의 기술이 적용되지 않았습니다."<<std::endl;
                         return;
@@ -358,14 +352,24 @@ void GameServer::ProcessGameState()
                 }
 
                 std::cout<<"몬스터 기술 계산"<<std::endl;
-                CalculatorMonster();
+                BattleInfo *bi = CalculatorMonster();
 
                 for(UserObject *user : game.users)
                 {
                     user->has_skill_request = false;
+                    user->tech_value = -1;
                 }
 
+                SendBattleInfo(bi);
                 game.round += 1;
+
+                delete bi;
+            }
+            // 경기 종료
+            else if(game.bstate == BattleState::Fin)
+            {
+                std::cout<<"FIN"<<std::endl;
+                SendBattleFin();
             }
 
             break;
@@ -376,9 +380,75 @@ void GameServer::ProcessGameState()
     }
 }
 
-void GameServer::CalculatorMonster()
+BattleInfo *GameServer::CalculatorMonster()
 {
+    UserObject *A_user = nullptr; 
+    UserObject *B_user = nullptr;
+    BattleInfo *bi = new BattleInfo();
 
+    // A_user가 선공권
+    if(game.users[0]->mob.speed > game.users[1]->mob.speed)
+    {   
+        A_user = game.users[0];
+        B_user = game.users[1];
+    }
+    else
+    {
+        A_user = game.users[1];
+        B_user = game.users[0];
+    }
+
+    Tech A_tech = tech_list[A_user->tech_value];
+    Tech B_tech = tech_list[B_user->tech_value];
+
+    Monster *A_mob = &A_user->mob;
+    Monster *B_mob = &B_user->mob;
+
+    int A_damage = 0;
+    int B_damage = 0;
+    int dec = 0;
+
+    A_damage = (int)(A_mob->attack * A_tech.damage  / 100); 
+    dec = (int)((float)(B_mob->defence) / (DEFENCE_VALUE + B_mob->defence) * 100);
+    A_damage = (int)(A_damage * (100 - dec) / 100); 
+
+
+    B_damage = (int)(B_mob->attack * B_tech.damage / 100);
+    dec = (int)((float)(A_mob->defence) / (DEFENCE_VALUE + A_mob->defence) * 100);
+    B_damage = (int)(B_damage * (100 - dec) / 100); 
+
+    //std::cout<<"User ID("<<A_user->fd<<")"<<"->"<<"("<<B_user->fd<<")"<<"=>"<<A_damage<<std::endl;
+    //std::cout<<"User ID("<<B_user->fd<<")"<<"->"<<"("<<A_user->fd<<")"<<"=>"<<B_damage<<std::endl;
+
+    // 죽음 확인 - 선턴 A 
+    if(B_mob->hp - A_damage <= 0)
+    {
+        game.bstate = BattleState::Fin;
+        game.win_uid = A_user->fd;
+    }
+    B_mob->hp -= A_damage;
+
+    if(A_mob->hp - B_damage <= 0)
+    {
+        game.bstate = BattleState::Fin;
+        game.win_uid = B_user->fd;
+    }
+    A_mob->hp -= B_damage;
+
+
+    bi->whois_first = A_user->fd; 
+
+    bi->a_damage = A_damage; 
+    bi->a_tech = A_user->tech_value; 
+    bi->a_ishit = 1;
+    bi->a_uid = A_user->fd;
+
+    bi->b_damage = B_damage; 
+    bi->b_tech = B_user->tech_value;
+    bi->b_ishit = 1;
+    bi->b_uid = B_user->fd;
+
+    return bi;
 }
 
 GameServer::GameServer()

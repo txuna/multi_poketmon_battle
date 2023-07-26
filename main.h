@@ -45,12 +45,13 @@ class GameServer
         EventLoop el;
         int GameLoop(TcpSocket *socket);
         void ProcessEvent(int retval);
+        void SendData(uint8_t *buffer, int len);
         void SendGameState();
         // Choice, Start, Fin 기존과 다르게 변경되었을 때 알림
         void SendBattleFin();
         // 게임정보 전송
         void SendBattleStart();
-        void SendBattleInfo();
+        void SendBattleInfo(BattleInfo *bi);
         bool CheckChoiceMonster();
         void ProcessGameState();
         int ProcessingAccept(TcpSocket *socket, int mask);
@@ -58,7 +59,7 @@ class GameServer
         void ProcessingPorotocol(TcpSocket *socket, int ret);
         void DeleteGameUser(socket_t fd);
         bool AuthUser(socket_t fd);
-        void CalculatorMonster();
+        BattleInfo *CalculatorMonster();
         GameServer();
         ~GameServer();
 };

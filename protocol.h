@@ -119,8 +119,9 @@ class BattleFinResponse : public Protocol
     public:
         ErrorCode result; 
         BattleState state; 
+        uuid_t win_uid;
         uint8_t buffer[SOCKET_BUFFER] = {0};
-        void WriteProtocol(ErrorCode r);
+        void WriteProtocol(ErrorCode r, uuid_t w);
 };
 
 class BattleStartResponse : public Protocol
@@ -142,15 +143,9 @@ class BattleInfoResponse : public Protocol
     public:
         uint8_t buffer[SOCKET_BUFFER] = {0};
         ErrorCode result; 
-        uuid_t a_uid;
-        Monster a_mob; 
+        BattleInfo *bi;
 
-        uuid_t b_uid; 
-        Monster b_mob; 
-
-        // 현재 상황 전송
-        
-        void WriteProtocol(ErrorCode r);
+        void WriteProtocol(ErrorCode r, BattleInfo *b, std::vector<UserObject*> users);
 };
 
 class SkillRequest : public Protocol

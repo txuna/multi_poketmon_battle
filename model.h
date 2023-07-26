@@ -33,12 +33,28 @@ class Monster
         void Set(int code);
 };
 
+class BattleInfo
+{
+    public:
+        int whois_first; 
+        uuid_t a_uid;
+        int a_damage; 
+        int a_tech; 
+        int a_ishit;
+
+        uuid_t b_uid;
+        int b_damage;
+        int b_tech; 
+        int b_ishit;
+};
+
 class UserObject
 {
     public:
         uint8_t name[NAME_LEN];
         socket_t fd;
         Monster mob;
+        int tech_value;
         // 서버는 지속적으로 user목록을 돌면서 해당 유저 모두가 해당 변수값으로 세팅되었다면 포켓몬 기술 계산 후 응답 전송
         bool has_skill_request; // 기술을 서버에 보냈는지 해당 라운드가 끝날때 false로 다시 세팅
 };
@@ -47,6 +63,7 @@ class UserObject
 class GameObject
 {
     public:
+        uuid_t win_uid;
         int round = 1;
         GameState gstate = GameState::GameReady;
         BattleState bstate = BattleState::Choice; 

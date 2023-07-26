@@ -131,8 +131,17 @@ MonsterChoiceResponse *ChoiceMonsterController::Choice(TcpSocket *socket, int *r
 }
 
 // 해당 몬스터에게 존재하는 skill인지 확인
-ErrorCode SkillController::Verify(UserObject *user, int code)
+ErrorCode SkillController::Verify(UserObject *user, int code, BattleState bs)
 {
+    if(bs != BattleState::Start)
+    { 
+        return ErrorCode::IsNotPlaying;
+    }
+    if(code == -1)
+    {
+        return ErrorCode::InvalidSkill;
+    }
+
     if(user->has_skill_request == true)
     {
         return ErrorCode::AlreadyChoiceSkill;
@@ -166,10 +175,11 @@ SkillResponse* SkillController::Choie(TcpSocket *socket, int *rb, GameObject *ga
     }
     else
     {
-        result = Verify(user, req->code);
+        result = Verify(user, req->code, game->bstate);
         if(result == ErrorCode::None)
         {
             user->has_skill_request = true;
+            user->tech_value = req->code;
         }
     }
 

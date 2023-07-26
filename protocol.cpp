@@ -82,12 +82,13 @@ void MonsterChoiceResponse::WriteProtocol(ErrorCode r)
     offset += sizeof(result);
 }
 
-void BattleFinResponse::WriteProtocol(ErrorCode r)
+void BattleFinResponse::WriteProtocol(ErrorCode r, uuid_t w)
 {
     type = ServerMsg::BattleFinResult;
     len = sizeof(ErrorCode) + sizeof(GameState);
     result = r; 
     state = BattleState::Fin;
+    win_uid = w;
 
     memcpy(buffer, &type, sizeof(type));
     offset += sizeof(type);
@@ -97,6 +98,8 @@ void BattleFinResponse::WriteProtocol(ErrorCode r)
     offset += sizeof(result);
     memcpy(buffer+offset, &state, sizeof(state));
     offset += sizeof(state);
+    memcpy(buffer+offset, &win_uid, sizeof(win_uid));
+    offset += sizeof(win_uid);
 }
 
 void BattleStartResponse::WriteProtocol(ErrorCode r, std::vector<UserObject*> users)
@@ -147,7 +150,38 @@ void SkillResponse::WriteProtocol(ErrorCode r)
     offset += sizeof(result);
 }
 
-void BattleInfoResponse::WriteProtocol(ErrorCode r)
+void BattleInfoResponse::WriteProtocol(ErrorCode r, BattleInfo *b, std::vector<UserObject*> users)
 {
+    type = ServerMsg::BattleInfoResult;
+    len = 0; 
+    result = r;
+    bi = b;
 
+    memcpy(buffer, &type, sizeof(type));
+    offset += sizeof(type);
+    memcpy(buffer+offset, &len, sizeof(len));
+    offset += sizeof(len);
+    memcpy(buffer+offset, &result, sizeof(result));
+    offset += sizeof(result);
+    
+    memcpy(buffer+offset, &bi->whois_first, sizeof(bi->whois_first));
+    offset += sizeof(bi->whois_first);
+
+    memcpy(buffer+offset, &bi->a_uid, sizeof(bi->a_uid));
+    offset += sizeof(bi->a_uid);
+    memcpy(buffer+offset, &bi->a_damage, sizeof(bi->a_damage));
+    offset += sizeof(bi->a_damage);
+    memcpy(buffer+offset, &bi->a_tech, sizeof(bi->a_tech));
+    offset += sizeof(bi->a_tech);
+    memcpy(buffer+offset, &bi->a_ishit, sizeof(bi->a_ishit));
+    offset += sizeof(bi->a_ishit);
+
+    memcpy(buffer+offset, &bi->b_uid, sizeof(bi->b_uid));
+    offset += sizeof(bi->b_uid);
+    memcpy(buffer+offset, &bi->b_damage, sizeof(bi->b_damage));
+    offset += sizeof(bi->b_damage);
+    memcpy(buffer+offset, &bi->b_tech, sizeof(bi->b_tech));
+    offset += sizeof(bi->b_tech);
+    memcpy(buffer+offset, &bi->b_ishit, sizeof(bi->b_ishit));
+    offset += sizeof(bi->b_ishit);
 }

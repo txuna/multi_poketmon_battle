@@ -17,6 +17,8 @@ typedef int uuid_t;
 
 #define MAX_USER 2
 
+#define DEFENCE_VALUE 100
+
 enum AttackType
 {
     Fire = 1,
@@ -67,6 +69,7 @@ enum ErrorCode
     NonExistMonster,
     InvalidSkill,
     AlreadyChoiceSkill,
+    IsNotPlaying,
 };
 
 #endif 

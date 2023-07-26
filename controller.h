@@ -37,7 +37,7 @@ class ChoiceMonsterController : public Controller
 class SkillController : public Controller
 {
     public:
-        ErrorCode Verify(UserObject *user, int code);
+        ErrorCode Verify(UserObject *user, int code, BattleState bs);
         SkillResponse *Choie(TcpSocket *socket, int *rb, GameObject *game);
 };
 
